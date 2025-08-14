@@ -1,103 +1,129 @@
-import Image from "next/image";
+"use client";
+import { useState, useEffect } from "react";
+import Settings from "../components/settings";
+
+type BackgroundSettings = {
+  mode: string;
+  morningColor: string;
+  middayColor: string;
+  nightColor: string;
+  midnightColor: string;
+  singleColor: string;
+  gradientColors: string[];
+};
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [showSettings, setShowSettings] = useState(false);
+  const [backgroundSettings, setBackgroundSettings] = useState<BackgroundSettings>({
+    mode: "time-sync",
+    morningColor: "#FFD700", // 朝の色 (ゴールド)
+    middayColor: "#FFFF00", // 昼の色 (黄色)
+    nightColor: "#1E90FF", // 夜の色 (青)
+    midnightColor: "#00008B", // 真夜中の色 (濃紺)
+    singleColor: "#FFFFFF",
+    gradientColors: ["#FF7F50", "#6A5ACD"],
+  });
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  // ページ読み込み時に設定をlocalStorageから読み込む
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('backgroundSettings');
+    if (savedSettings) {
+      try {
+        const parsedSettings = JSON.parse(savedSettings);
+        setBackgroundSettings({
+          ...backgroundSettings,
+          ...parsedSettings
+        });
+      } catch (e) {
+        console.error("設定の読み込みに失敗しました", e);
+      }
+    }
+  }, []);
+
+  // 色を滑らかに補間する関数
+  const interpolateColor = (color1: string, color2: string, factor: number): string => {
+    const c1 = parseInt(color1.slice(1), 16);
+    const c2 = parseInt(color2.slice(1), 16);
+
+    const r1 = (c1 >> 16) & 0xff;
+    const g1 = (c1 >> 8) & 0xff;
+    const b1 = c1 & 0xff;
+
+    const r2 = (c2 >> 16) & 0xff;
+    const g2 = (c2 >> 8) & 0xff;
+    const b2 = c2 & 0xff;
+
+    const r = Math.round(r1 + factor * (r2 - r1));
+    const g = Math.round(g1 + factor * (g2 - g1));
+    const b = Math.round(b1 + factor * (b2 - b1));
+
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+  };
+
+  // 時間に基づいて背景色を取得する関数
+  const getBackgroundColor = () => {
+    const currentHour = new Date().getHours();
+    const currentMinute = new Date().getMinutes();
+    
+    if (backgroundSettings.mode === "time-sync") {
+      // 時間帯に応じた色の変化
+      if (currentHour >= 5 && currentHour < 12) {
+        // 朝 (5時〜12時): 朝の色から昼の色へ
+        const factor = ((currentHour - 5) * 60 + currentMinute) / (7 * 60); // 5時から12時までの進行度
+        return interpolateColor(backgroundSettings.morningColor, backgroundSettings.middayColor, factor);
+      } else if (currentHour >= 12 && currentHour < 18) {
+        // 昼 (12時〜18時): 昼の色から夜の色へ
+        const factor = ((currentHour - 12) * 60 + currentMinute) / (6 * 60); // 12時から18時までの進行度
+        return interpolateColor(backgroundSettings.middayColor, backgroundSettings.nightColor, factor);
+      } else if (currentHour >= 18 && currentHour < 23) {
+        // 夜 (18時〜23時): 夜の色から真夜中の色へ
+        const factor = ((currentHour - 18) * 60 + currentMinute) / (5 * 60); // 18時から23時までの進行度
+        return interpolateColor(backgroundSettings.nightColor, backgroundSettings.midnightColor, factor);
+      } else {
+        // 真夜中 (23時〜5時): 真夜中の色から朝の色へ
+        const adjustedHour = currentHour < 5 ? currentHour + 24 : currentHour;
+        const factor = ((adjustedHour - 23) * 60 + currentMinute) / (6 * 60); // 23時から5時までの進行度
+        return interpolateColor(backgroundSettings.midnightColor, backgroundSettings.morningColor, factor);
+      }
+    } else if (backgroundSettings.mode === "single-color") {
+      return backgroundSettings.singleColor;
+    } else if (backgroundSettings.mode === "gradient") {
+      return `linear-gradient(to right, ${backgroundSettings.gradientColors[0]}, ${backgroundSettings.gradientColors[1]})`;
+    }
+    
+    return "#FFFFFF"; // デフォルト色
+  };
+
+  // 設定画面以外の部分をクリックしたときに設定を閉じる
+  const handleBackgroundClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      setShowSettings(true);
+    }
+  };
+
+  // 設定が適用されたときの処理
+  const handleSettingsApply = (settings: BackgroundSettings) => {
+    setBackgroundSettings(settings);
+    localStorage.setItem('backgroundSettings', JSON.stringify(settings));
+  };
+
+  return (
+    <div
+      className="w-screen h-screen flex items-center justify-center"
+      style={{
+        background: getBackgroundColor(),
+        transition: "background 1s ease",
+      }}
+      onClick={handleBackgroundClick}
+    >
+      
+      {showSettings && (
+        <Settings
+          settings={backgroundSettings}
+          onClose={() => setShowSettings(false)}
+          onApply={handleSettingsApply}
+        />
+      )}
     </div>
   );
 }
