@@ -4,6 +4,7 @@ type BackgroundSettings = {
   mode: string;
   morningColor: string;
   middayColor: string;
+  eveningColor: string; // 追加：夕方の色
   nightColor: string;
   midnightColor: string;
   singleColor: string;
@@ -20,6 +21,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onClose, onApply }) => {
   const [mode, setMode] = useState(settings.mode);
   const [morningColor, setMorningColor] = useState(settings.morningColor);
   const [middayColor, setMiddayColor] = useState(settings.middayColor);
+  const [eveningColor, setEveningColor] = useState(settings.eveningColor || '#FFA500'); // 夕方の色（デフォルトはオレンジ）
   const [nightColor, setNightColor] = useState(settings.nightColor);
   const [midnightColor, setMidnightColor] = useState(settings.midnightColor);
   const [singleColor, setSingleColor] = useState(settings.singleColor);
@@ -30,6 +32,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onClose, onApply }) => {
     setMode(settings.mode);
     setMorningColor(settings.morningColor);
     setMiddayColor(settings.middayColor);
+    setEveningColor(settings.eveningColor || '#FFA500');
     setNightColor(settings.nightColor);
     setMidnightColor(settings.midnightColor);
     setSingleColor(settings.singleColor);
@@ -42,6 +45,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onClose, onApply }) => {
       mode,
       morningColor,
       middayColor,
+      eveningColor,
       nightColor,
       midnightColor,
       singleColor,
@@ -82,7 +86,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onClose, onApply }) => {
             
             <div className="p-3 border border-gray-200 rounded">
               <label className="block mb-2">
-                <span className="font-medium">朝の色 (5時〜12時):</span>
+                <span className="font-medium">朝の色 (5時〜10時):</span>
                 <div className="flex items-center mt-1">
                   <input
                     type="color"
@@ -97,7 +101,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onClose, onApply }) => {
             
             <div className="p-3 border border-gray-200 rounded">
               <label className="block mb-2">
-                <span className="font-medium">昼間の色 (12時〜18時):</span>
+                <span className="font-medium">昼間の色 (10時〜16時):</span>
                 <div className="flex items-center mt-1">
                   <input
                     type="color"
@@ -109,10 +113,25 @@ const Settings: React.FC<SettingsProps> = ({ settings, onClose, onApply }) => {
                 </div>
               </label>
             </div>
+
+            <div className="p-3 border border-gray-200 rounded">
+              <label className="block mb-2">
+                <span className="font-medium">夕方の色 (16時〜19時):</span>
+                <div className="flex items-center mt-1">
+                  <input
+                    type="color"
+                    className="w-12 h-8 mr-2"
+                    value={eveningColor}
+                    onChange={(e) => setEveningColor(e.target.value)}
+                  />
+                  <span className="text-sm">{eveningColor}</span>
+                </div>
+              </label>
+            </div>
             
             <div className="p-3 border border-gray-200 rounded">
               <label className="block mb-2">
-                <span className="font-medium">夜の色 (18時〜23時):</span>
+                <span className="font-medium">夜の色 (19時〜23時):</span>
                 <div className="flex items-center mt-1">
                   <input
                     type="color"

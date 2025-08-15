@@ -6,6 +6,7 @@ type BackgroundSettings = {
   mode: string;
   morningColor: string;
   middayColor: string;
+  eveningColor: string;
   nightColor: string;
   midnightColor: string;
   singleColor: string;
@@ -18,6 +19,7 @@ export default function Home() {
     mode: "time-sync",
     morningColor: "#FFD700", // 朝の色 (ゴールド)
     middayColor: "#FFFF00", // 昼の色 (黄色)
+    eveningColor: "#FFA500", // 夕方の色 (オレンジ)
     nightColor: "#1E90FF", // 夜の色 (青)
     midnightColor: "#00008B", // 真夜中の色 (濃紺)
     singleColor: "#FFFFFF",
@@ -67,23 +69,32 @@ export default function Home() {
     
     if (backgroundSettings.mode === "time-sync") {
       // 時間帯に応じた色の変化
-      if (currentHour >= 5 && currentHour < 12) {
-        // 朝 (5時〜12時): 朝の色から昼の色へ
-        const factor = ((currentHour - 5) * 60 + currentMinute) / (7 * 60); // 5時から12時までの進行度
-        return interpolateColor(backgroundSettings.morningColor, backgroundSettings.middayColor, factor);
-      } else if (currentHour >= 12 && currentHour < 18) {
-        // 昼 (12時〜18時): 昼の色から夜の色へ
-        const factor = ((currentHour - 12) * 60 + currentMinute) / (6 * 60); // 12時から18時までの進行度
-        return interpolateColor(backgroundSettings.middayColor, backgroundSettings.nightColor, factor);
-      } else if (currentHour >= 18 && currentHour < 23) {
-        // 夜 (18時〜23時): 夜の色から真夜中の色へ
-        const factor = ((currentHour - 18) * 60 + currentMinute) / (5 * 60); // 18時から23時までの進行度
-        return interpolateColor(backgroundSettings.nightColor, backgroundSettings.midnightColor, factor);
+      if (currentHour >= 5 && currentHour < 10) {
+        // 朝 (5時〜10時): 朝の色から昼の色へ
+        const factor = ((currentHour - 5) * 60 + currentMinute) / (5 * 60); // 5時から10時までの進行度
+        const gradientColor = interpolateColor(backgroundSettings.morningColor, backgroundSettings.middayColor, factor);
+        return `linear-gradient(to right, ${backgroundSettings.morningColor}, ${gradientColor}, ${backgroundSettings.middayColor})`;
+      } else if (currentHour >= 10 && currentHour < 16) {
+        // 昼 (10時〜16時): 昼の色から夕方の色へ
+        const factor = ((currentHour - 10) * 60 + currentMinute) / (6 * 60); // 10時から16時までの進行度
+        const gradientColor = interpolateColor(backgroundSettings.middayColor, backgroundSettings.eveningColor, factor);
+        return `linear-gradient(to right, ${backgroundSettings.middayColor}, ${gradientColor}, ${backgroundSettings.eveningColor})`;
+      } else if (currentHour >= 16 && currentHour < 19) {
+        // 夕方 (16時〜19時): 夕方の色から夜の色へ
+        const factor = ((currentHour - 16) * 60 + currentMinute) / (3 * 60); // 16時から19時までの進行度
+        const gradientColor = interpolateColor(backgroundSettings.eveningColor, backgroundSettings.nightColor, factor);
+        return `linear-gradient(to right, ${backgroundSettings.eveningColor}, ${gradientColor}, ${backgroundSettings.nightColor})`;
+      } else if (currentHour >= 19 && currentHour < 23) {
+        // 夜 (19時〜23時): 夜の色から真夜中の色へ
+        const factor = ((currentHour - 19) * 60 + currentMinute) / (4 * 60); // 19時から23時までの進行度
+        const gradientColor = interpolateColor(backgroundSettings.nightColor, backgroundSettings.midnightColor, factor);
+        return `linear-gradient(to right, ${backgroundSettings.nightColor}, ${gradientColor}, ${backgroundSettings.midnightColor})`;
       } else {
         // 真夜中 (23時〜5時): 真夜中の色から朝の色へ
         const adjustedHour = currentHour < 5 ? currentHour + 24 : currentHour;
         const factor = ((adjustedHour - 23) * 60 + currentMinute) / (6 * 60); // 23時から5時までの進行度
-        return interpolateColor(backgroundSettings.midnightColor, backgroundSettings.morningColor, factor);
+        const gradientColor = interpolateColor(backgroundSettings.midnightColor, backgroundSettings.morningColor, factor);
+        return `linear-gradient(to right, ${backgroundSettings.midnightColor}, ${gradientColor}, ${backgroundSettings.morningColor})`;
       }
     } else if (backgroundSettings.mode === "single-color") {
       return backgroundSettings.singleColor;
